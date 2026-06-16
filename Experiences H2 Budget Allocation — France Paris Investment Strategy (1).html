@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experiences H2 Budget Allocation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    padding: 20px 24px;
+    font-size: 13px;
+  }
+
+  .page-header { margin-bottom: 16px; }
+  .page-header h1 {
+    font-size: 16px; font-weight: 700; color: #111; letter-spacing: -0.2px;
+  }
+  .page-header p { font-size: 11px; color: #888; margin-top: 2px; }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .tile {
+    background: #fff; border-radius: 8px;
+    padding: 13px 14px 11px; border: 1px solid #e2e4ea;
+  }
+  .tile-badge {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge-green  { background:#e8f5e9; color:#2e7d32; }
+  .badge-blue   { background:#e3f0fb; color:#1565c0; }
+  .badge-purple { background:#f3e8fd; color:#6a1b9a; }
+  .badge-amber  { background:#e8f5e9; color:#1b5e20; border: 1px solid #a5d6a7; }
+  .badge-rose   { background:#fce4ec; color:#b71c1c; }
+  .tile-label {
+    font-size: 10px; font-weight: 600; color: #777;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    margin-bottom: 5px; line-height: 1.3;
+  }
+  .tile-value { font-size: 24px; font-weight: 700; color: #111; line-height: 1; margin-bottom: 5px; }
+  .tile-note  { font-size: 10px; color: #555; line-height: 1.4; border-top: 1px solid #f0f0f0; padding-top: 6px; margin-top: 4px; }
+  .tile-note strong { font-weight: 700; }
+  .tile-green  { border-left: 3px solid #4caf50; }
+  .tile-blue   { border-left: 3px solid #2196f3; }
+  .tile-purple { border-left: 3px solid #9c27b0; }
+  .tile-amber  { border-left: 3px solid #2e7d32; box-shadow: 0 0 0 1.5px #c8e6c9; }
+  .tile-rose   { border-left: 3px solid #e91e63; }
+
+  .table-wrap { background:#fff; border-radius:8px; border:1px solid #e2e4ea; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+
+  thead tr th {
+    background:#1c2340; color:rgba(255,255,255,0.9);
+    padding:9px 11px; font-size:10px; font-weight:600;
+    text-align:right; letter-spacing:0.2px; white-space:nowrap; line-height:1.3;
+  }
+  thead tr th:first-child { text-align:left; }
+  thead tr.subhead th {
+    background:#262e50; font-size:9.5px; font-weight:500;
+    color:rgba(255,255,255,0.65); padding:5px 11px;
+  }
+  thead tr.subhead th:first-child { text-align:left; }
+
+  td {
+    padding:7px 11px; text-align:right;
+    border-bottom:1px solid #f2f2f4; color:#333; white-space:nowrap;
+  }
+  td:first-child { text-align:left; font-weight:500; }
+  tr:last-child td { border-bottom:none; }
+
+  .row-q3 { background:#fff; }
+  .row-q4 { background:#fafbff; }
+
+  .row-q3-total td { background:#1c3d72!important; color:#fff!important; font-weight:700; border-top:2px solid #163260; border-bottom:none; }
+  .row-q4-total td { background:#1e5c35!important; color:#fff!important; font-weight:700; border-top:2px solid #184a2a; border-bottom:none; }
+  .row-h2-total td { background:#111!important; color:#fff!important; font-weight:700; font-size:12.5px; border-top:2px solid #000; border-bottom:none; }
+
+  .section-divider td {
+    background:#edf0f7; color:#444; font-size:10px; font-weight:700;
+    letter-spacing:0.6px; text-transform:uppercase; padding:5px 11px;
+    text-align:left!important; border-bottom:1px solid #dde1ec;
+  }
+
+  .opt2-col { background:#fff8fb!important; }
+  th.opt2-h   { background:#930038!important; }
+  th.opt2-sub { background:#aa0042!important; font-size:9px!important; color:rgba(255,255,255,0.75)!important; }
+
+  .idx-wrap { display:flex; align-items:center; justify-content:flex-end; gap:5px; }
+  .idx-bar  { height:5px; border-radius:3px; display:inline-block; }
+
+  .footnote { font-size:10px; color:#999; margin-top:10px; padding:0 2px; line-height:1.6; }
+
+  .legend { display:flex; gap:14px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+  .legend-item { display:flex; align-items:center; gap:5px; font-size:10.5px; color:#555; }
+  .ldot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+  /* ── RECOMMENDATION PANEL ── */
+  .rec-panel {
+    background: #f0f7ee;
+    border: 1.5px solid #4caf50;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .rec-icon {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    background: #4caf50;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; line-height: 1;
+    margin-top: 1px;
+  }
+  .rec-body { flex: 1; }
+  .rec-headline {
+    font-size: 12px; font-weight: 700; color: #1b5e20;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+  }
+  .rec-headline .rec-tag {
+    background: #4caf50; color: #fff;
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 2px 7px; border-radius: 10px;
+  }
+  .rec-rationale {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .rec-reason {
+    background: #fff;
+    border: 1px solid #c8e6c9;
+    border-radius: 6px;
+    padding: 9px 11px;
+  }
+  .rec-reason-icon { font-size: 14px; margin-bottom: 4px; }
+  .rec-reason-title { font-size: 10px; font-weight: 700; color: #2e7d32; margin-bottom: 3px; }
+  .rec-reason-text  { font-size: 10px; color: #444; line-height: 1.45; }
+
+  /* Option 1 recommended styling */
+  th.opt1-h   { background: #2e7d32!important; }
+  th.opt1-sub { background: #388e3c!important; font-size:9px!important; color:rgba(255,255,255,0.8)!important; }
+  .opt1-col   { background: #f1f8f1!important; }
+  .pct-opt1 { color: #2e7d32; font-weight: 700; }
+  .pct-opt2 { color: #930038; font-weight: 600; }
+
+  .rec-star {
+    display: inline-block;
+    background: #fff;
+    color: #2e7d32;
+    font-size: 8px;
+    font-weight: 800;
+    border-radius: 3px;
+    padding: 1px 4px;
+    margin-left: 5px;
+    vertical-align: middle;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Experiences H2 Budget Allocation — France / Paris Investment Strategy</h1>
+  <p>France Seasonality + Paris Impact applied for Q3 · Q4 reverts to business-driven Paris opportunity · $14.0M Total H2</p>
+</div>
+
+<div class="tiles">
+  <div class="tile tile-green">
+    <div class="tile-badge badge-green">Approved</div>
+    <div class="tile-label">Experiences H2 Total Budget</div>
+    <div class="tile-value">$14.0M</div>
+    <div class="tile-note">Jul – Dec 2025 · Full H2</div>
+  </div>
+  <div class="tile tile-blue">
+    <div class="tile-badge badge-blue">Paris vs. US</div>
+    <div class="tile-label">Paris vs. US Checkin % &amp; Opportunity</div>
+    <div class="tile-value">7 / 93</div>
+    <div class="tile-note">Business baseline check-in split</div>
+  </div>
+  <div class="tile tile-purple">
+    <div class="tile-badge badge-purple">France vs. US</div>
+    <div class="tile-label">France vs. US Checkin % &amp; Opportunity</div>
+    <div class="tile-value">25 / 75</div>
+    <div class="tile-note">Broader France market opportunity</div>
+  </div>
+  <div class="tile tile-amber">
+    <div class="tile-badge badge-amber">✦ Recommended</div>
+    <div class="tile-label">Q3 France Investment — 25/75 Scenario</div>
+    <div class="tile-value">$2.3M</div>
+    <div class="tile-note"><strong>2.8x index</strong> over business opportunity<br>France Seasonality, Paris Impact</div>
+  </div>
+  <div class="tile tile-rose">
+    <div class="tile-badge badge-rose">Option 2 · High</div>
+    <div class="tile-label">Q3 France Investment — 40/60 Scenario</div>
+    <div class="tile-value">$3.6M</div>
+    <div class="tile-note"><strong>4.1x index</strong> over business opportunity<br>France Seasonality, Paris Impact</div>
+  </div>
+</div>
+
+<!-- RECOMMENDATION PANEL -->
+<div class="rec-panel">
+  <div class="rec-icon">✦</div>
+  <div class="rec-body">
+    <div class="rec-headline">
+      <span class="rec-tag">Recommendation</span>
+      Option 1 (25/75) — France Seasonality, Paris Impact
+    </div>
+    <div class="rec-rationale">
+      <div class="rec-reason">
+        <div class="rec-reason-icon">🗼</div>
+        <div class="rec-reason-title">Prioritizes Paris Above Business Weight</div>
+        <div class="rec-reason-text">At 2.8x over the 7/93 baseline, Option 1 meaningfully scales Paris investment beyond its raw check-in share — signaling strategic commitment without over-rotating away from US performance.</div>
+      </div>
+      <div class="rec-reason">
+        <div class="rec-reason-icon">🇫🇷</div>
+        <div class="rec-reason-title">Aligns with Broader French Opportunity</div>
+        <div class="rec-reason-text">The 25/75 France/US split mirrors the broader France check-in opportunity (25/75), anchoring the investment in a defensible, data-backed framework tied to real market size.</div>
+      </div>
+      <div class="rec-reason">
+        <div class="rec-reason-icon">🇺🇸</div>
+        <div class="rec-reason-title">Protects US Funding for Key Testing</div>
+        <div class="rec-reason-text">Preserving a larger US share keeps headroom for important US market tests and initiatives in H2 — Option 2's 40% France allocation would meaningfully compress that flexibility.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="ldot" style="background:#2196f3"></div>Paris Index</div>
+  <div class="legend-item"><div class="ldot" style="background:#9c27b0"></div>France Index — higher Jul–Aug drives summer front-load</div>
+  <div class="legend-item"><div class="ldot" style="background:#607d8b"></div>US Index</div>
+  <div class="legend-item"><div class="ldot" style="background:#2e7d32;box-shadow:0 0 0 2px #a5d6a7"></div><strong style="color:#1b5e20">Option 1 — Recommended (25/75)</strong></div>
+  <div class="legend-item"><div class="ldot" style="background:#930038"></div>Option 2 — High (40/60)</div>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2">Month</th>
+      <th rowspan="2">Paris<br>Index</th>
+      <th rowspan="2">France<br>Index</th>
+      <th rowspan="2">US<br>Index</th>
+      <th class="opt1-h" colspan="3">Option 1 — Low · 25/75 France/US <span class="rec-star">✦ REC</span></th>
+      <th class="opt2-h" colspan="3">Option 2 — High · 40/60 France/US</th>
+      <th rowspan="2">H2 Total<br>Investment</th>
+      <th class="opt1-h">% → Paris<br>Opt 1</th>
+      <th class="opt2-h">% → Paris<br>Opt 2</th>
+    </tr>
+    <tr class="subhead">
+      <th class="opt1-sub">Total Inv.</th>
+      <th class="opt1-sub">Paris $</th>
+      <th class="opt1-sub">US $</th>
+      <th class="opt2-sub">Total Inv.</th>
+      <th class="opt2-sub">Paris $</th>
+      <th class="opt2-sub">US $</th>
+      <th class="opt1-sub"></th>
+      <th class="opt2-sub"></th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+
+<div class="footnote">
+  Seasonal indexes from Sheet25 G:I — G=Paris, H=France, I=US.
+  France Seasonality + Paris Impact scenario applied to Q3 (Jul–Sep); Q4 reverts to ~7/93 Paris/US reflecting true business check-in opportunity.
+  Option 1 (Low) = 25/75 France/US · <strong>2.8x index over pure business opportunity</strong>. Option 2 (High) = 40/60 France/US · <strong>4.1x index over pure business opportunity</strong>.
+  H2 Total Investment column reflects Option 1 (conservative) pacing. All values in USD.
+</div>
+
+<script>
+const fmt = v => {
+  if (v === 0) return '—';
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+  return '$' + Math.round(v/1000) + 'K';
+};
+const pct = v => (v * 100).toFixed(0) + '%';
+const bar = (v, max, color) => {
+  const w = Math.max(4, Math.round((v / max) * 44));
+  return `<span class="idx-bar" style="width:${w}px;background:${color}"></span>`;
+};
+
+const weeks = [
+  ["2025-06-28", 1.36, 1.10, 1.19,  218100,  354700,  139000,  452100],
+  ["2025-07-05", 1.26, 1.15, 1.31,  228600,  391500,  145700,  499100],
+  ["2025-07-12", 1.17, 1.44, 1.17,  286000,  347200,  182300,  442600],
+  ["2025-07-19", 1.05, 1.40, 1.22,  277800,  364900,  177100,  465100],
+  ["2025-07-26", 0.97, 1.45, 1.26,  287000,  375300,  183000,  478400],
+  ["2025-08-02", 0.92, 1.57, 1.23,  311900,  366000,  198800,  466600],
+  ["2025-08-09", 0.96, 1.70, 1.17,  337700,  348400,  215200,  444200],
+  ["2025-08-16", 0.94, 1.73, 1.11,  343200,  331700,  218800,  422800],
+  ["2025-08-23", 0.84, 1.49, 1.04,  296900,  309100,  189200,  394000],
+  ["2025-08-30", 0.79, 1.07, 1.09,  212000,  325100,  135100,  414400],
+  ["2025-09-06", 1.01, 1.00, 1.00,  199200,  297000,  126900,  378600],
+  ["2025-09-13", 1.06, 0.98, 0.91,  195100,  270600,  124300,  345000],
+  ["2025-09-20", 1.11, 0.94, 0.98,  186700,  291200,  119000,  371200],
+  ["2025-09-27", 1.11, 0.86, 0.98,  170100,  290900,  108400,  370800],
+  ["2025-10-04", 1.16, 0.81, 0.98,   41100,  463900,   41200,  464400],
+  ["2025-10-11", 1.16, 0.79, 1.12,   42600,  528300,   41100,  528900],
+  ["2025-10-18", 1.08, 0.77, 1.11,   39700,  523800,   38300,  524400],
+  ["2025-10-25", 1.05, 0.86, 0.96,   38500,  451100,   37100,  451500],
+  ["2025-11-01", 0.92, 0.76, 0.77,   33700,  361600,   32500,  361900],
+  ["2025-11-08", 0.91, 0.71, 0.87,   33600,  410600,   32400,  411000],
+  ["2025-11-15", 0.82, 0.57, 0.80,   30300,  375200,   29300,  375600],
+  ["2025-11-22", 0.94, 0.56, 0.69,   34500,  326700,   33300,  327000],
+  ["2025-11-29", 0.88, 0.57, 1.04,   32600,  488800,   31400,  489300],
+  ["2025-12-06", 0.89, 0.62, 0.65,   32800,  308100,   31600,  308500],
+  ["2025-12-13", 0.82, 0.57, 0.66,   30000,  310100,   29000,  310400],
+  ["2025-12-20", 0.79, 0.60, 0.65,   29200,  306400,   28200,  306700],
+  ["2025-12-27", 1.04, 0.95, 1.04,   38100,  490100,   36800,  490600],
+];
+
+const monthAssign = [
+  ["Jul", "Q3", 0,1,2,3,4],
+  ["Aug", "Q3", 5,6,7,8],
+  ["Sep", "Q3", 9,10,11,12,13],
+  ["Oct", "Q4", 14,15,16,17],
+  ["Nov", "Q4", 18,19,20,21],
+  ["Dec", "Q4", 22,23,24,25,26],
+];
+
+const monthData = monthAssign.map(([mo, q, ...wi]) => {
+  const wrows = wi.map(i => weeks[i]);
+  const n = wrows.length;
+  const avg = col => wrows.reduce((s,r) => s + r[col], 0) / n;
+  const sum = col => wrows.reduce((s,r) => s + r[col], 0);
+  return {
+    mo, q,
+    paris_idx:  +avg(1).toFixed(2),
+    france_idx: +avg(2).toFixed(2),
+    us_idx:     +avg(3).toFixed(2),
+    o2p: sum(4), o2u: sum(5),
+    o1p: sum(6), o1u: sum(7),
+  };
+});
+
+const maxIdx = 1.80;
+const tbody = document.getElementById('tbody');
+let currentQ = null;
+
+monthData.forEach(d => {
+  const { mo, q, paris_idx, france_idx, us_idx, o2p, o2u, o1p, o1u } = d;
+  const o2t = o2p + o2u, o1t = o1p + o1u;
+
+  if (q !== currentQ) {
+    currentQ = q;
+    const div = document.createElement('tr');
+    div.className = 'section-divider';
+    div.innerHTML = `<td colspan="13">${q} — ${q==='Q3'
+      ? 'France Seasonality + Paris Impact · Options 1 &amp; 2'
+      : 'Business Opportunity Driven · ~7/93 Paris/US'}</td>`;
+    tbody.appendChild(div);
+  }
+
+  const tr = document.createElement('tr');
+  tr.className = q === 'Q3' ? 'row-q3' : 'row-q4';
+  tr.innerHTML = `
+    <td><strong>${mo}</strong></td>
+    <td><div class="idx-wrap">${paris_idx.toFixed(2)}${bar(paris_idx, maxIdx, '#2196f3')}</div></td>
+    <td><div class="idx-wrap">${france_idx.toFixed(2)}${bar(france_idx, maxIdx, '#9c27b0')}</div></td>
+    <td><div class="idx-wrap">${us_idx.toFixed(2)}${bar(us_idx, maxIdx, '#607d8b')}</div></td>
+    <td class="opt1-col">${fmt(o1t)}</td>
+    <td class="opt1-col" style="color:#2e7d32;font-weight:700">${fmt(o1p)}</td>
+    <td class="opt1-col">${fmt(o1u)}</td>
+    <td class="opt2-col">${fmt(o2t)}</td>
+    <td class="opt2-col" style="color:#930038">${fmt(o2p)}</td>
+    <td class="opt2-col">${fmt(o2u)}</td>
+    <td style="font-weight:600">${fmt(o1t)}</td>
+    <td class="pct-opt1">${pct(o1p / o1t)}</td>
+    <td class="pct-opt2">${pct(o2p / o2t)}</td>
+  `;
+  tbody.appendChild(tr);
+});
+
+function addTotal(label, rows, cls) {
+  const s = rows.reduce((a, d) => ({
+    o2p: a.o2p+d.o2p, o2u: a.o2u+d.o2u,
+    o1p: a.o1p+d.o1p, o1u: a.o1u+d.o1u
+  }), {o2p:0,o2u:0,o1p:0,o1u:0});
+  const o2t = s.o2p+s.o2u, o1t = s.o1p+s.o1u;
+  const tr = document.createElement('tr');
+  tr.className = cls;
+  tr.innerHTML = `
+    <td>${label}</td>
+    <td>—</td><td>—</td><td>—</td>
+    <td>${fmt(o1t)}</td><td>${fmt(s.o1p)}</td><td>${fmt(s.o1u)}</td>
+    <td>${fmt(o2t)}</td><td>${fmt(s.o2p)}</td><td>${fmt(s.o2u)}</td>
+    <td>${fmt(o1t)}</td>
+    <td>${pct(s.o1p/o1t)}</td>
+    <td>${pct(s.o2p/o2t)}</td>
+  `;
+  tbody.appendChild(tr);
+}
+
+const q3 = monthData.filter(d => d.q === 'Q3');
+const q4 = monthData.filter(d => d.q === 'Q4');
+addTotal('Q3 Total', q3, 'row-q3-total');
+addTotal('Q4 Total', q4, 'row-q4-total');
+addTotal('H2 Total', monthData, 'row-h2-total');
+</script>
+</body>
+</html>
