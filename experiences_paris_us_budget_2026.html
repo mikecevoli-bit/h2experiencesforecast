@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{font-family:sans-serif;padding:1rem;font-size:13px;color:#111}
+.bt{width:100%;border-collapse:collapse;font-size:13px}
+.bt th{font-size:11px;font-weight:500;color:#666;text-align:right;padding:5px 10px;border-bottom:1px solid #e5e5e5}
+.bt th:first-child{text-align:left}
+.bt td{padding:7px 10px;text-align:right;border-bottom:1px solid #f0f0f0;color:#111}
+.bt td:first-child{text-align:left;font-weight:500}
+.bt tr.sub-row td{background:#f7f7f7;font-weight:500;border-top:1.5px solid #ccc}
+.bt tr.q4-row td{background:#f0faf5}
+.bt td.mo:before{content:'';display:inline-block;width:3px;height:13px;border-radius:2px;margin-right:7px;vertical-align:-3px;background:#378ADD}
+.bt tr.q4-row td.mo:before{background:#1D9E75}
+.bt tr.sub-row td.mo:before{display:none}
+.bt tr.note-row td{font-size:11px;color:#888;border-bottom:none;text-align:left;padding:2px 10px 5px 22px}
+.mc{border-radius:8px;padding:11px 14px;flex:1;min-width:110px}
+.tiles{display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="tiles">
+  <div class="mc" style="background:#eaf3de;border:1px solid #639922">
+    <div style="font-size:11px;font-weight:500;color:#3B6D11;margin-bottom:1px">Experiences H2</div>
+    <div style="font-size:10px;color:#3B6D11;margin-bottom:5px">Approved</div>
+    <div style="font-size:20px;font-weight:500">$14.0M</div>
+  </div>
+  <div class="mc" style="background:#e6f1fb;border:1px solid #185FA5">
+    <div style="font-size:11px;font-weight:500;color:#185FA5;margin-bottom:1px">Paris H2</div>
+    <div style="font-size:10px;color:#185FA5;margin-bottom:5px">50% Q3 → 32% Q4</div>
+    <div style="font-size:20px;font-weight:500" id="tile-paris">—</div>
+  </div>
+  <div class="mc" style="background:#f5f5f5;border:1px solid #ccc">
+    <div style="font-size:11px;font-weight:500;color:#666;margin-bottom:1px">US H2</div>
+    <div style="font-size:10px;color:#666;margin-bottom:5px">50% Q3 → 68% Q4</div>
+    <div style="font-size:20px;font-weight:500" id="tile-us">—</div>
+  </div>
+  <div class="mc" style="background:#fbeaf0;border:1px solid #993556">
+    <div style="font-size:11px;font-weight:500;color:#72243E;margin-bottom:1px">Checkin Share</div>
+    <div style="font-size:10px;color:#72243E;margin-bottom:5px">Paris vs. US</div>
+    <div style="font-size:20px;font-weight:500">32% / 68%</div>
+  </div>
+</div>
+
+<table class="bt">
+  <thead>
+    <tr>
+      <th>Month</th>
+      <th>Paris idx</th>
+      <th>US idx</th>
+      <th>Paris $</th>
+      <th>US $</th>
+      <th>Total</th>
+      <th>Paris %</th>
+    </tr>
+  </thead>
+  <tbody id="tb"></tbody>
+</table>
+<div style="font-size:11px;color:#888;margin-top:8px">Indexed to Paris/US check-in seasonality from Sheet25. Jun is a partial week (6/28 only). Split: 50/50 Jun–Sep 27, then 32% Paris / 68% US from Oct 4 per business-driven check-in index.</div>
+
+<script>
+var paris_seasonal=[569.6,597.0,746.7,725.4,749.5,814.3,881.7,896.1,775.2,553.6,
+                    520.0,509.3,487.6,444.1,422.4,407.9,398.2,447.7,
+                    392.1,366.6,296.2,288.3,295.5,319.5,295.4,309.8,490.5];
+var us_seasonal=[617.4,681.5,604.3,635.1,653.3,637.1,606.5,577.4,538.0,565.9,
+                 516.9,471.1,506.9,506.3,510.6,581.5,576.5,496.4,
+                 397.9,451.9,412.9,359.5,538.0,339.1,341.2,337.2,539.4];
+var paris_idx_w=[1.10,1.15,1.44,1.40,1.45,1.57,1.70,1.73,1.49,1.07,
+                 1.00,0.98,0.94,0.86,0.81,0.79,0.77,0.86,0.76,0.71,0.57,0.56,0.57,
+                 0.62,0.57,0.60,0.95];
+var us_idx_w=[1.19,1.31,1.17,1.22,1.26,1.23,1.17,1.11,1.04,1.09,
+              1.00,0.91,0.98,0.98,0.98,1.12,1.11,0.96,0.77,0.87,0.80,0.69,1.04,
+              0.65,0.66,0.65,1.04];
+var months_w=["Jun","Jul","Jul","Jul","Jul","Aug","Aug","Aug","Aug","Aug",
+              "Sep","Sep","Sep","Sep","Oct","Oct","Oct","Oct",
+              "Nov","Nov","Nov","Nov","Nov","Dec","Dec","Dec","Dec"];
+
+var BUDGET=14000000;
+var p_split=[.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.32,.32,.32,.32,.32,.32,.32,.32,.32,.32,.32,.32,.32];
+var u_split=[.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.68,.68,.68,.68,.68,.68,.68,.68,.68,.68,.68,.68,.68];
+
+var p_biz=paris_seasonal.map(function(v,i){return v*p_split[i];});
+var u_biz=us_seasonal.map(function(v,i){return v*u_split[i];});
+var total_biz=p_biz.reduce(function(a,b){return a+b;},0)+u_biz.reduce(function(a,b){return a+b;},0);
+
+var mo_order=["Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var mp={},mu={},mpidx={},muidx={};
+mo_order.forEach(function(m){mp[m]=0;mu[m]=0;mpidx[m]=[];muidx[m]=[];});
+months_w.forEach(function(m,i){
+  mp[m]+=p_biz[i]/total_biz*BUDGET;
+  mu[m]+=u_biz[i]/total_biz*BUDGET;
+  mpidx[m].push(paris_idx_w[i]);
+  muidx[m].push(us_idx_w[i]);
+});
+
+var fmt=function(v){
+  if(v>=1e6)return'$'+(v/1e6).toFixed(2)+'M';
+  return'$'+(v/1000).toFixed(0)+'K';
+};
+var avg=function(arr){return arr.reduce(function(a,b){return a+b;},0)/arr.length;};
+
+var tb=document.getElementById('tb');
+var q3m=["Jul","Aug","Sep"],q4m=["Oct","Nov","Dec"];
+
+function addRow(label,p,u,pidx,uidx,cls,note){
+  var tot=p+u,pct=(p/tot*100).toFixed(0)+'%';
+  var tr=document.createElement('tr');
+  if(cls)tr.className=cls;
+  var pidxStr=pidx!==null?pidx.toFixed(2):'—';
+  var uidxStr=uidx!==null?uidx.toFixed(2):'—';
+  var moClass=(cls&&cls.indexOf('sub')>=0)?'':'mo';
+  tr.innerHTML='<td class="'+moClass+'">'+label+'</td><td>'+pidxStr+'</td><td>'+uidxStr+'</td><td>'+fmt(p)+'</td><td>'+fmt(u)+'</td><td style="font-weight:500">'+fmt(tot)+'</td><td>'+pct+'</td>';
+  tb.appendChild(tr);
+  if(note){
+    var nr=document.createElement('tr');nr.className='note-row';
+    nr.innerHTML='<td colspan="7">'+note+'</td>';
+    tb.appendChild(nr);
+  }
+}
+
+mo_order.forEach(function(m){
+  var isQ4=q4m.indexOf(m)>=0;
+  var p=mp[m],u=mu[m],pidx=avg(mpidx[m]),uidx=avg(muidx[m]);
+  var note=m==='Jun'?'Paris high priority split — 50/50 through Jun 28':
+           m==='Oct'?'Split shifts: 32% Paris / 68% US from Oct 4 (business check-in driven)':null;
+  addRow(m+'-26',p,u,pidx,uidx,isQ4?'q4-row':'',note);
+});
+
+var q3p=q3m.reduce(function(a,m){return a+mp[m];},0);
+var q3u=q3m.reduce(function(a,m){return a+mu[m];},0);
+var q4p=q4m.reduce(function(a,m){return a+mp[m];},0);
+var q4u=q4m.reduce(function(a,m){return a+mu[m];},0);
+var h2p=q3p+q4p,h2u=q3u+q4u;
+
+addRow('Q3 Total (Jul–Sep)',q3p,q3u,null,null,'sub-row');
+addRow('Q4 Total (Oct–Dec)',q4p,q4u,null,null,'sub-row');
+addRow('H2 Total (Jul–Dec)',h2p,h2u,null,null,'sub-row');
+
+document.getElementById('tile-paris').textContent=fmt(h2p);
+document.getElementById('tile-us').textContent=fmt(h2u);
+</script>
+</body>
+</html>
